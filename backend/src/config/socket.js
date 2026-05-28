@@ -59,13 +59,28 @@ export const initSocket = (server) => {
     socket.on('send_message', (messageData) => {
       // messageData: { sender, recipient, group, content, huffmanEncoded, category, createdAt, senderName, senderAvatar }
       if (messageData.group) {
-        // Send to group channel (excluding sender is handled by frontend or broadcast)
+        // Send to group channel
         socket.to(messageData.group).emit('receive_message', messageData);
-      } else if (messageData.recipient) {
+        return;
+      }
+
+      if (messageData.recipient) {
         // Send to specific recipient socket
         const recipientSocketId = getSocketId(messageData.recipient);
         if (recipientSocketId) {
           io.to(recipientSocketId).emit('receive_message', messageData);
+
+          // Unread/notification signal for recipient (used by Sidebar)
+          io.to(recipientSocketId).emit('new_message_notification', {
+            senderId: messageData.sender,
+            recipientId: messageData.recipient,
+            groupId: null,
+            chatId: messageData.recipient,
+            // For direct chats, treat partner as sender
+            partnerId: messageData.sender,
+            contentPreview: messageData.content,
+            createdAt: messageData.createdAt || new Date().toISOString()
+          });
         }
       }
     });

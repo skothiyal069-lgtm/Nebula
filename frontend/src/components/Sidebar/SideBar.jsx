@@ -20,6 +20,7 @@ export const SideBar = ({
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [chats, setChats] = useState({ rooms: [], groups: [], direct: [] });
+  const [unreadByPartnerId, setUnreadByPartnerId] = useState({});
   const [showProfileCard, setShowProfileCard] = useState(false);
   const [profileStatus, setProfileStatus] = useState(user?.status || '');
   const [profileMood, setProfileMood] = useState(user?.mood || 'cyber');
@@ -69,14 +70,58 @@ export const SideBar = ({
       });
     };
 
+    const handleNewMessageNotification = (data) => {
+      if (!data) return;
+
+      const { partnerId, chatId } = data;
+      const key = chatId || partnerId;
+      if (!key) return;
+
+      // If user is already in that chat, treat as read (no badge, no toast)
+      const isCurrentlySelected = selectedChat?.type === 'direct' && selectedChat.id === key;
+      if (isCurrentlySelected) {
+        // treat as read
+        setUnreadByPartnerId(prev => {
+          if (!prev[key]) return prev;
+          const next = { ...prev };
+          delete next[key];
+          return next;
+        });
+        return;
+      }
+
+      // Badge increment
+      setUnreadByPartnerId(prev => {
+        const next = { ...prev };
+        next[key] = (next[key] || 0) + 1;
+        return next;
+      });
+
+      // Toast (lightweight; use alert-like browser toast via DOM)
+      // Only display toast when user has a chat open but not the relevant one.
+      const senderName = data.senderId || 'Unknown';
+      const preview = data.contentPreview || 'New message';
+      const toast = document.createElement('div');
+      toast.className = 'fixed bottom-5 left-1/2 -translate-x-1/2 z-[100] px-3 py-2 rounded-xl bg-cyber-black/95 border border-cyber-orange/30 shadow-glow-orange text-[11px] text-white max-w-[320px]';
+      toast.innerHTML = `<div class="text-cyber-orange uppercase font-tech text-[9px]">New Transmission</div><div class="mt-0.5">From: ${senderName}</div><div class="text-slate-300 mt-0.5 line-clamp-2">${preview}</div>`;
+      document.body.appendChild(toast);
+      setTimeout(() => {
+        toast.style.transition = 'opacity 200ms ease';
+        toast.style.opacity = '0';
+        setTimeout(() => toast.remove(), 250);
+      }, 2500);
+    };
+
     socket.on('user_status_change', handleStatusChange);
     socket.on('user_profile_updated', handleProfileUpdate);
+    socket.on('new_message_notification', handleNewMessageNotification);
 
     return () => {
       socket.off('user_status_change', handleStatusChange);
       socket.off('user_profile_updated', handleProfileUpdate);
+      socket.off('new_message_notification', handleNewMessageNotification);
     };
-  }, [socket]);
+  }, [socket, selectedChat]);
 
   // Trie Search Trigger on Input change
   useEffect(() => {
@@ -347,6 +392,13 @@ export const SideBar = ({
 
                   {/* energy visual tag */}
                   <div className="flex flex-col items-end flex-shrink-0">
+                    {unreadByPartnerId[contact._id] ? (
+                      <span className="mb-1 inline-flex items-center justify-center min-w-5 h-5 px-1 rounded-full bg-cyber-orange/20 border border-cyber-orange/40 text-cyber-orange text-[10px] font-tech font-bold">
+                        {unreadByPartnerId[contact._id]}
+                      </span>
+                    ) : (
+                      <span className="mb-1 inline-block w-5 h-5" />
+                    )}
                     <Battery className={`w-3.5 h-3.5 ${contact.energyLevel > 50 ? 'text-emerald-500' : 'text-cyber-orange'}`} />
                     <span className="text-[8px] font-tech text-slate-400">{contact.energyLevel}%</span>
                   </div>
