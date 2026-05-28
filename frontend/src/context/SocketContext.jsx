@@ -12,7 +12,10 @@ export const SocketProvider = ({ children }) => {
     if (user) {
       try {
         // Connect to root path with configuration
-        const socketUrl = import.meta.env.VITE_SOCKET_URL || window.location.origin;
+        let socketUrl = import.meta.env.VITE_SOCKET_URL || window.location.origin;
+        if (socketUrl && !socketUrl.startsWith('http://') && !socketUrl.startsWith('https://') && !socketUrl.startsWith('ws://') && !socketUrl.startsWith('wss://')) {
+          socketUrl = `https://${socketUrl}`;
+        }
         const socketConnection = io(socketUrl, {
           autoConnect: true,
           reconnection: true,
