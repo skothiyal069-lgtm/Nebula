@@ -159,18 +159,16 @@ Go to **Service Settings** → **Custom Domain**
 
 ## Troubleshooting
 
-### ❌ "Backend service won't start"
+### Troubleshooting
 
-**Check:**
-- Logs show "npm ERR!"? → Missing dependencies in `backend/package.json`
-- Logs show "Cannot find module './cpp_core'"? → See [C++ Build Issues](#cpp-build-issues)
+**❌ "failed to read dockerfile: open Dockerfile: no such file or directory"**
 
-**Fix:**
-```bash
-cd backend
-npm install  # Ensure all packages installed
-npm start
-```
+**Why:** Render detects a Dockerfile but build context is wrong.
+
+**Fix:** ✅ Already applied!
+- Removed broken Dockerfiles (backend & frontend)
+- render.yaml now uses **Source Code build** (no Docker needed)
+- Just push to GitHub and redeploy
 
 ### ❌ Frontend shows connection errors
 
