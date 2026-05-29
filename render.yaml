@@ -1,17 +1,19 @@
 services:
-  # Backend Node.js Service (Runs the main server + compiles C++ core)
+  # Backend Node.js Service (Express + Socket.IO + MongoDB/JSON DB)
   - type: web
     name: nebula-chat-backend
     runtime: node
     plan: free
     rootDir: backend
-    buildCommand: npm install && cd ../cpp_core && make CXX=g++ && cd ../backend
+    buildCommand: npm install
     startCommand: npm start
     envVars:
       - key: PORT
         value: 5001
+      - key: NODE_ENV
+        value: production
       - key: MONGO_URI
-        sync: false # You can enter your MongoDB Atlas URL here later, otherwise it falls back to the local JSON db
+        sync: false
       - key: JWT_SECRET
         generateValue: true
 
@@ -38,3 +40,4 @@ services:
           type: web
           name: nebula-chat-backend
           property: host
+          

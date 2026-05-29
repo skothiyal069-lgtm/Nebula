@@ -69,53 +69,55 @@ WhatClone/
 
 ---
 
-## Setup & Running Guide
+## 🚀 Quick Start (Local Development)
 
 ### Prerequisites
-Make sure you have Node.js (v18+) and a C++ compiler (`clang++` or `g++`) installed on your system.
+- **Node.js** v18+
+- **C++ Compiler** (`clang++` or `g++`)
 
-### 1. Compile C++ Core Engine
-Enter the C++ folder and compile:
+### Option 1: Direct Run (5 minutes)
+
+**Step 1: Compile C++ Engine**
 ```bash
-cd cpp_core
-make clean && make
+cd cpp_core && make clean && make && cd ..
 ```
-This produces the `nebula_core` binary.
 
-### 2. Configure & Seed Backend
-Enter the backend directory, install packages, and seed:
+**Step 2: Backend**
 ```bash
-cd ../backend
-npm install --no-audit --no-fund --cache .npm-cache
+cd backend
+npm install
 node seed.js
-```
-*(Seeding creates 5 demo user agents and historical direct chats)*
-
-### 3. Start Backend
-Run:
-```bash
 npm start
 ```
-The server will bind to port `5001`.
+→ Backend runs on `http://localhost:5001`
 
-### 4. Configure & Start Frontend
-Open a new terminal window, enter the frontend, install, and run:
+**Step 3: Frontend (new terminal)**
 ```bash
 cd frontend
-npm install --no-audit --no-fund --cache .npm-cache
+npm install
 npm run dev
 ```
-The client dev server will run on port `3000`. Open `http://localhost:3000` in your web browser.
+→ Frontend runs on `http://localhost:3000`
 
----
+### Option 2: Docker Compose
 
-## Docker Compose Quickstart
-
-To build and launch the entire stack (MongoDB, Node API, React Client) inside Docker containers:
 ```bash
 docker-compose up --build
 ```
-The app will be accessible at `http://localhost:3000`.
+→ Access at `http://localhost:3000`
+
+---
+
+## ☁️ Deploy to Render
+
+**See [DEPLOYMENT.md](./DEPLOYMENT.md) for detailed instructions.**
+
+Quick Deploy:
+1. Push to GitHub
+2. Go to [Render Dashboard](https://render.com)
+3. Create Blueprint Instance using `render.yaml`
+4. Set MongoDB URI & JWT Secret
+5. Deploy!
 
 ---
 *Created under sector 0x7FF - Nebula Communications Protocol.*
